@@ -25,6 +25,7 @@ CUSTOM_TYPES = {
     'integer': 'integer',
     'decimal': 'number',
     'checkbox': 'boolean',
+    'lookup': 'integer',
 }
 
 DEFAULT_SEARCH_WINDOW_SIZE = (60 * 60 * 24) * 30 # defined in seconds, default to a month (30 days)
@@ -244,7 +245,8 @@ class Tickets(Stream):
     def sync(self, state):
         bookmark = self.get_bookmark(state)
         sideload_objects = get_sideload_objects(self.stream)
-        tickets = self.client.tickets.incremental(start_time=bookmark, include=sideload_objects)
+        records_per_page = self.config.get('records_per_page', 200)
+        tickets = self.client.tickets.incremental(start_time=bookmark, include=sideload_objects, per_page=records_per_page)
         audits_stream = TicketAudits(self.client)
         metrics_stream = TicketMetrics(self.client)
         comments_stream = TicketComments(self.client)
@@ -273,35 +275,45 @@ class Tickets(Stream):
             ticket_dict.pop('fields') # NB: Fields is a duplicate of custom_fields, remove before emitting
             should_yield = self._buffer_record((self.stream, ticket_dict))
 
-            if audits_stream.is_selected():
-                try:
-                    for audit in audits_stream.sync(ticket_dict["id"]):
-                        zendesk_metrics.capture('ticket_audit')
-                        self._buffer_record(audit)
-                except RecordNotFoundException:
-                    LOGGER.warning("Unable to retrieve audits for ticket (ID: %s), " \
-                    "the Zendesk API returned a RecordNotFound error", ticket_dict["id"])
+            # Only request below if ticket status is not 'deleted' or skip_deleted is False (default is True)
+            # Note, the status = deleted flag is only valid for the /incremental/tickets endpoint, not /tickets
+            skip_deleted = self.config.get('skip_deleted', True)
 
-            if metrics_stream.is_selected():
-                try:
-                    for metric in metrics_stream.sync(ticket_dict["id"]):
-                        zendesk_metrics.capture('ticket_metric')
-                        self._buffer_record(metric)
-                except RecordNotFoundException:
-                    LOGGER.warning("Unable to retrieve metrics for ticket (ID: %s), " \
-                    "the Zendesk API returned a RecordNotFound error", ticket_dict["id"])
+            if not skip_deleted or ticket_dict["status"] != 'deleted':
+                if audits_stream.is_selected():
+                    try:
+                        for audit in audits_stream.sync(ticket_dict["id"]):
+                            zendesk_metrics.capture('ticket_audit')
+                            self._buffer_record(audit)
+                    except RecordNotFoundException:
+                        LOGGER.warning("Unable to retrieve audits for ticket (ID: %s), " \
+                        "the Zendesk API returned a RecordNotFound error", ticket_dict["id"])
 
-            if comments_stream.is_selected():
-                try:
-                    # add ticket_id to ticket_comment so the comment can
-                    # be linked back to it's corresponding ticket
-                    for comment in comments_stream.sync(ticket_dict["id"]):
-                        zendesk_metrics.capture('ticket_comment')
-                        comment[1].ticket_id = ticket_dict["id"]
-                        self._buffer_record(comment)
-                except RecordNotFoundException:
-                    LOGGER.warning("Unable to retrieve comments for ticket (ID: %s), " \
-                    "the Zendesk API returned a RecordNotFound error", ticket_dict["id"])
+                if metrics_stream.is_selected():
+                    try:
+                        for metric in metrics_stream.sync(ticket_dict["id"]):
+                            zendesk_metrics.capture('ticket_metric')
+                            self._buffer_record(metric)
+                    except RecordNotFoundException:
+                        LOGGER.warning("Unable to retrieve metrics for ticket (ID: %s), " \
+                        "the Zendesk API returned a RecordNotFound error", ticket_dict["id"])
+
+                if comments_stream.is_selected():
+                    try:
+                        # add ticket_id to ticket_comment so the comment can
+                        # be linked back to it's corresponding ticket
+                        for comment in comments_stream.sync(ticket_dict["id"]):
+                            zendesk_metrics.capture('ticket_comment')
+                            comment[1].ticket_id = ticket_dict["id"]
+                            self._buffer_record(comment)
+                    except RecordNotFoundException:
+                        LOGGER.warning("Unable to retrieve comments for ticket (ID: %s), " \
+                        "the Zendesk API returned a RecordNotFound error", ticket_dict["id"])
+
+            else:
+                LOGGER.info("Not attempting to retrieve audits, metrics or comments for ticket (ID: %s) as "
+                            "ticket status is %s", ticket_dict["id"], ticket_dict["status"])
+
 
             if should_yield:
                 for rec in self._empty_buffer():
@@ -388,7 +400,7 @@ class SatisfactionRatings(Stream):
             # minutes, due to this, the tap will adjust the time range
             # dynamically to ensure bookmarks are able to be written in
             # cases of high volume.
-            if satisfaction_ratings.count > 50000:
+            if len(satisfaction_ratings) > 50000:
                 search_window_size = search_window_size // 2
                 end = start + datetime.timedelta(seconds=search_window_size)
                 LOGGER.info("satisfaction_ratings - Detected Search API response size for this window is too large (> 50k). Cutting search window in half to %s seconds.", search_window_size)
