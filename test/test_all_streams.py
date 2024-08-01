@@ -12,7 +12,8 @@ class ZendeskAllStreams(ZendeskTest):
 
     def expected_sync_streams(self):
         return {
-            "brands" "tickets",
+            "brands",
+            "tickets",
             "groups",
             "users",
             "organizations",
