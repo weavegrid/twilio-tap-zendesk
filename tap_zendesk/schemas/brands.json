@@ -1,0 +1,200 @@
+{
+  "type": [
+    "null",
+    "object"
+  ],
+  "properties": {
+    "active": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "brand_url": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "default": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "has_help_center": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "help_center_state": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "host_mapping": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "signature_template": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "subdomain": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "ticket_form_ids": [
+      47,
+      33,
+      22
+    ],
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "url": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "logo": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "content_type": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "image/png",
+        "content_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "file_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "id": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "size": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        }
+      },
+      "url": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "thumbnails": {
+        "type": [
+          "null",
+          "array"
+        ],
+        "items": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "content_type": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "content_url": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "file_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "mapped_content_url": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "size": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "url": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "width": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

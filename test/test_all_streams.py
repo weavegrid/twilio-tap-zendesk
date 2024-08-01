@@ -12,7 +12,7 @@ class ZendeskAllStreams(ZendeskTest):
 
     def expected_sync_streams(self):
         return {
-            "tickets",
+            "brands" "tickets",
             "groups",
             "users",
             "organizations",
@@ -21,12 +21,13 @@ class ZendeskAllStreams(ZendeskTest):
             "ticket_fields",
             "group_memberships",
             "macros",
-            #"tags",
+            # "tags",
             "ticket_metrics",
         }
 
     def expected_pks(self):
         return {
+            "brands": {"id"},
             "tickets": {"id"},
             "groups": {"id"},
             "users": {"id"},
@@ -36,7 +37,7 @@ class ZendeskAllStreams(ZendeskTest):
             "ticket_fields": {"id"},
             "group_memberships": {"id"},
             "macros": {"id"},
-            #"tags": {"name"},
+            # "tags": {"name"},
             "ticket_metrics": {"id"},
         }
 
@@ -74,4 +75,3 @@ class ZendeskAllStreams(ZendeskTest):
                 pk_set = self.expected_pks()[stream]
                 for pk in pk_set:
                     self.assertIsNotNone(m.get('data', {}).get(pk), msg="Missing primary-key for message {}".format(m))
-

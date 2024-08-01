@@ -133,6 +133,24 @@ def raise_or_log_zenpy_apiexception(schema, stream, e):
         raise e
 
 
+class Brands(Stream):
+    name = "brands"
+    replication_method = "INCREMENTAL"
+    replication_key = "updated_at"
+
+    def sync(self, state):
+        bookmark = self.get_bookmark(state)
+
+        brands = self.client.brands()
+        for brand in brands:
+            if utils.strptime_with_tz(brand.updated_at) >= bookmark:
+                # NB: We don't trust that the records come back ordered by
+                # updated_at (we've observed out-of-order records),
+                # so we can't save state until we've seen all records
+                self.update_bookmark(state, brand.updated_at)
+                yield (self.stream, brand)
+
+
 class Organizations(Stream):
     name = "organizations"
     replication_method = "INCREMENTAL"
@@ -377,7 +395,7 @@ class SatisfactionRatings(Stream):
         # created_at, but zendesk support confirmed with us that
         # satisfaction_ratings are immutable so that created_at =
         # updated_at
-        #start = bookmark_epoch-1
+        # start = bookmark_epoch-1
         start = bookmark - datetime.timedelta(seconds=1)
         end = start + datetime.timedelta(seconds=search_window_size)
         if 'end_date' in self.config:
