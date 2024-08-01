@@ -71,11 +71,15 @@
         "string"
       ]
     },
-    "ticket_form_ids": [
-      47,
-      33,
-      22
-    ],
+    "ticket_form_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "integer"
+      }
+    },
     "updated_at": {
       "type": [
         "null",
@@ -101,7 +105,6 @@
             "string"
           ]
         },
-        "image/png",
         "content_url": {
           "type": [
             "null",
