@@ -635,6 +635,7 @@ class Call_legs(Stream):
             yield self.stream, leg
 
 STREAMS = {
+    "brands": Brands,
     "tickets": Tickets,
     "groups": Groups,
     "users": Users,
@@ -654,5 +655,5 @@ STREAMS = {
     "agents_activity": AgentsActivity,
     "articles": Article,
     "calls": Call,
-    "call_legs": Call_legs
+    "call_legs": Call_legs,
 }
